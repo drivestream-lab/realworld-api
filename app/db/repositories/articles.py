@@ -1,7 +1,7 @@
 from typing import List, Optional, Sequence, Union
 
 from asyncpg import Connection, Record
-from pypika import Query
+from pypika import Order, Query
 
 from app.db.errors import EntityDoesNotExist
 from app.db.queries.queries import queries
@@ -193,6 +193,12 @@ class ArticlesRepository(BaseRepository):  # noqa: WPS214
                 ),
             )
             # fmt: on
+
+        # REQ-34 / FF-10: newest-first by publish/update time.
+        query = query.orderby(articles.updated_at, order=Order.desc).orderby(
+            articles.created_at,
+            order=Order.desc,
+        )
 
         query = query.limit(Parameter(query_params_count + 1)).offset(
             Parameter(query_params_count + 2),
