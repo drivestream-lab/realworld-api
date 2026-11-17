@@ -1,0 +1,5 @@
+{
+  "list_status": 200,
+  "get_status": 200,
+  "notes": "Guest list/get/tag/profile succeed without Authorization; feed newest-first."
+}
