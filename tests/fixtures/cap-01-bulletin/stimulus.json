@@ -1,0 +1,14 @@
+{
+  "paths": {
+    "list_articles": "/api/articles",
+    "get_article": "/api/articles",
+    "create_article": "/api/articles",
+    "get_profile": "/api/profiles"
+  },
+  "publish": {
+    "title_prefix": "W0 Bulletin",
+    "description": "CAP-01 stimulus article",
+    "body": "Body for CAP-01 live prove.",
+    "tagList": ["w0-bulletin", "cap-01"]
+  }
+}
