@@ -1,7 +1,7 @@
 from typing import List, Optional, Sequence, Union
 
 from asyncpg import Connection, Record
-from pypika import Query
+from pypika import Order, Query
 
 from app.db.errors import EntityDoesNotExist
 from app.db.queries.queries import queries
@@ -78,6 +78,7 @@ class ArticlesRepository(BaseRepository):  # noqa: WPS214
         updated_article.description = description or article.description
 
         async with self.connection.transaction():
+            # DB trigger update_article_modtime advances updated_at (REQ-34).
             updated_article.updated_at = await queries.update_article(
                 self.connection,
                 slug=article.slug,
@@ -194,8 +195,12 @@ class ArticlesRepository(BaseRepository):  # noqa: WPS214
             )
             # fmt: on
 
-        query = query.limit(Parameter(query_params_count + 1)).offset(
-            Parameter(query_params_count + 2),
+        # REQ-34: newest-first by publish/update time, then create time.
+        query = (
+            query.orderby(articles.updated_at, order=Order.desc)
+            .orderby(articles.created_at, order=Order.desc)
+            .limit(Parameter(query_params_count + 1))
+            .offset(Parameter(query_params_count + 2))
         )
         query_params.extend([limit, offset])
 
