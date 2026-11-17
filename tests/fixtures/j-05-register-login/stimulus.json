@@ -1,0 +1,8 @@
+{
+  "journey": "J-05",
+  "steps": [
+    {"action": "POST", "path": "/api/users", "auth": false, "expect": "eligibility, no seat token"},
+    {"action": "POST", "path": "/api/users/login", "auth": false, "expect": "seat token"}
+  ],
+  "notes": "Register then login; contribution available only after login."
+}
