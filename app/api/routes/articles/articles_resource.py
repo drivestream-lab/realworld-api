@@ -26,6 +26,10 @@ from app.services.articles import check_article_exists, get_slug_for_article
 
 router = APIRouter()
 
+# ADR-004 / REQ-12: Wave0a unseat is client JWT discard — there is no logout RPC.
+# Omitting Authorization (or discarding the bearer) leaves the actor unseated;
+# contribution routes that require get_current_user_authorizer() fail closed.
+
 
 @router.get("", response_model=ListOfArticlesInResponse, name="articles:list-articles")
 async def list_articles(
