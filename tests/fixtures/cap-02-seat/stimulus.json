@@ -1,0 +1,12 @@
+{
+  "paths": {
+    "register": "/api/users",
+    "login": "/api/users/login"
+  },
+  "register": {
+    "username_prefix": "w0seat",
+    "email_local": "w0seat",
+    "email_domain": "example.test",
+    "password": "password-w0-seat"
+  }
+}
