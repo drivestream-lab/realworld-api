@@ -6,6 +6,7 @@ from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 
 from app.db.repositories.users import UsersRepository
 from app.models.domain.users import UserInDB
+from app.models.schemas.users import UserInResponse
 
 pytestmark = pytest.mark.asyncio
 
@@ -21,6 +22,11 @@ async def test_user_success_registration(
         app.url_path_for("auth:register"), json=registration_json
     )
     assert response.status_code == HTTP_201_CREATED
+
+    body = UserInResponse(**response.json())
+    assert body.user.email == email
+    assert body.user.username == username
+    assert body.user.token == ""
 
     async with pool.acquire() as conn:
         repo = UsersRepository(conn)
@@ -54,3 +60,4 @@ async def test_failed_user_registration_when_some_credentials_are_taken(
         app.url_path_for("auth:register"), json=registration_json
     )
     assert response.status_code == HTTP_400_BAD_REQUEST
+    assert "token" not in response.json().get("user", {})
