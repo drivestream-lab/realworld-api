@@ -15,6 +15,11 @@ async def test_user_successful_login(
 
     response = await client.post(app.url_path_for("auth:login"), json=login_json)
     assert response.status_code == HTTP_200_OK
+    body = response.json()
+    # Login is the sole seat issuer (REQ-10).
+    assert body["user"]["token"]
+    assert isinstance(body["user"]["token"], str)
+    assert len(body["user"]["token"]) > 0
 
 
 @pytest.mark.parametrize(
