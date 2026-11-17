@@ -6,7 +6,9 @@ from starlette import status
 
 from app.db.repositories.profiles import ProfilesRepository
 from app.db.repositories.users import UsersRepository
+from app.models.domain.articles import Article
 from app.models.domain.users import UserInDB
+from app.models.schemas.articles import ListOfArticlesInResponse
 from app.models.schemas.profiles import ProfileInResponse
 
 pytestmark = pytest.mark.asyncio
@@ -18,9 +20,29 @@ async def test_unregistered_user_will_receive_profile_without_following(
     response = await client.get(
         app.url_path_for("profiles:get-profile", username=test_user.username)
     )
+    assert response.status_code == status.HTTP_200_OK
     profile = ProfileInResponse(**response.json())
     assert profile.profile.username == test_user.username
     assert not profile.profile.following
+
+
+async def test_guest_can_list_author_articles_without_authorization(
+    app: FastAPI,
+    client: AsyncClient,
+    test_user: UserInDB,
+    test_article: Article,
+) -> None:
+    response = await client.get(
+        app.url_path_for("articles:list-articles"),
+        params={"author": test_user.username},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    articles = ListOfArticlesInResponse(**response.json())
+    assert articles.articles_count >= 1
+    assert any(article.slug == test_article.slug for article in articles.articles)
+    assert all(
+        article.author.username == test_user.username for article in articles.articles
+    )
 
 
 async def test_user_that_does_not_follows_another_will_receive_profile_without_follow(
