@@ -21,6 +21,9 @@ async def test_user_success_registration(
         app.url_path_for("auth:register"), json=registration_json
     )
     assert response.status_code == HTTP_201_CREATED
+    body = response.json()
+    # Register must not mint a usable contribution seat (REQ-08).
+    assert not body["user"]["token"]
 
     async with pool.acquire() as conn:
         repo = UsersRepository(conn)
