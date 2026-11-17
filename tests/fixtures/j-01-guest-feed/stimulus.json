@@ -1,0 +1,8 @@
+{
+  "journey": "J-01",
+  "steps": [
+    {"action": "GET", "path": "/api/articles", "auth": false},
+    {"action": "GET", "path": "/api/articles/{slug}", "auth": false, "when": "feed non-empty"}
+  ],
+  "notes": "Guest opens global feed then article when present."
+}
