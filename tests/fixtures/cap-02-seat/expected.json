@@ -1,0 +1,6 @@
+{
+  "register_status": 201,
+  "login_status": 200,
+  "register_token_empty": true,
+  "unseated_create_statuses": [401, 403]
+}
