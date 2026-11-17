@@ -1,0 +1,8 @@
+{
+  "register_status": 201,
+  "duplicate_register_status": 400,
+  "login_status": 200,
+  "invalid_login_status": 400,
+  "unseated_mutate_status": [401, 403],
+  "notes": "Register has empty/absent token; login returns token; unseated mutate fail-closed."
+}
