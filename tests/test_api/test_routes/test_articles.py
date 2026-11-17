@@ -573,3 +573,91 @@ async def test_filtering_with_limit_and_offset(
 
     articles_from_response = ListOfArticlesInResponse(**response.json())
     assert full_articles.articles[3:] == articles_from_response.articles
+
+
+async def test_guest_can_list_and_get_articles_without_authorization(
+    app: FastAPI, client: AsyncClient, test_article: Article
+) -> None:
+    list_response = await client.get(app.url_path_for("articles:list-articles"))
+    assert list_response.status_code == status.HTTP_200_OK
+    listed = ListOfArticlesInResponse(**list_response.json())
+    assert listed.articles_count >= 1
+    assert any(article.slug == test_article.slug for article in listed.articles)
+
+    get_response = await client.get(
+        app.url_path_for("articles:get-article", slug=test_article.slug)
+    )
+    assert get_response.status_code == status.HTTP_200_OK
+    fetched = ArticleInResponse(**get_response.json())
+    assert fetched.article.slug == test_article.slug
+
+
+async def test_guest_can_filter_articles_by_tag_without_authorization(
+    app: FastAPI, client: AsyncClient, test_article: Article
+) -> None:
+    response = await client.get(
+        app.url_path_for("articles:list-articles"),
+        params={"tag": "tests"},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    articles = ListOfArticlesInResponse(**response.json())
+    assert articles.articles_count >= 1
+    assert all("tests" in article.tags for article in articles.articles)
+
+
+async def test_global_feed_orders_newest_first_by_updated_at(
+    app: FastAPI, client: AsyncClient, test_user: UserInDB, pool: Pool
+) -> None:
+    async with pool.acquire() as connection:
+        articles_repo = ArticlesRepository(connection)
+        await articles_repo.create_article(
+            slug="older-slug",
+            title="Older",
+            description="tmp",
+            body="tmp",
+            author=test_user,
+        )
+        await articles_repo.create_article(
+            slug="newer-slug",
+            title="Newer",
+            description="tmp",
+            body="tmp",
+            author=test_user,
+        )
+        # FakeAsyncPGPool keeps one transaction; now() is stable for the tx, so
+        # disable the updated_at trigger and stamp with clock_timestamp().
+        await connection.execute(
+            "ALTER TABLE articles DISABLE TRIGGER update_article_modtime"
+        )
+        await connection.execute(
+            "UPDATE articles SET updated_at = clock_timestamp() + INTERVAL '1 hour' "
+            "WHERE slug = $1",
+            "older-slug",
+        )
+        await connection.execute(
+            "ALTER TABLE articles ENABLE TRIGGER update_article_modtime"
+        )
+
+    response = await client.get(app.url_path_for("articles:list-articles"))
+    assert response.status_code == status.HTTP_200_OK
+    articles = ListOfArticlesInResponse(**response.json())
+    slugs = [article.slug for article in articles.articles]
+    assert slugs.index("older-slug") < slugs.index("newer-slug")
+    assert articles.articles[0].slug == "older-slug"
+
+
+async def test_unseated_create_article_is_denied(
+    app: FastAPI, client: AsyncClient
+) -> None:
+    response = await client.post(
+        app.url_path_for("articles:create-article"),
+        json={
+            "article": {
+                "title": "No Seat",
+                "description": "denied",
+                "body": "denied",
+            }
+        },
+    )
+    # Chassis APIKeyHeader fails closed with 403 when Authorization is omitted.
+    assert response.status_code == status.HTTP_403_FORBIDDEN
