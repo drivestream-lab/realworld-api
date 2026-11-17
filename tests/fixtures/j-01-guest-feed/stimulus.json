@@ -1,0 +1,8 @@
+{
+  "covers": ["J-01", "CAP-01", "REQ-01", "REQ-34"],
+  "steps": [
+    {"method": "GET", "path": "/api/articles?limit=20", "auth": false}
+  ],
+  "human_lookat": "Confirm newest-first slug order when ≥2 articles exist",
+  "dependencies": ["postgres", "realworld-api"]
+}

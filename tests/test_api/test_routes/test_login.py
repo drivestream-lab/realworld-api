@@ -4,6 +4,7 @@ from httpx import AsyncClient
 from starlette.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from app.models.domain.users import UserInDB
+from app.models.schemas.users import UserInResponse
 
 pytestmark = pytest.mark.asyncio
 
@@ -15,6 +16,12 @@ async def test_user_successful_login(
 
     response = await client.post(app.url_path_for("auth:login"), json=login_json)
     assert response.status_code == HTTP_200_OK
+
+    body = UserInResponse(**response.json())
+    assert body.user.email == test_user.email
+    assert body.user.username == test_user.username
+    assert body.user.token
+    assert len(body.user.token) > 0
 
 
 @pytest.mark.parametrize(

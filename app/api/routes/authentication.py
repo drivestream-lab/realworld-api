@@ -62,7 +62,6 @@ async def login(
 async def register(
     user_create: UserInCreate = Body(..., embed=True, alias="user"),
     users_repo: UsersRepository = Depends(get_repository(UsersRepository)),
-    settings: AppSettings = Depends(get_app_settings),
 ) -> UserInResponse:
     if await check_username_is_taken(users_repo, user_create.username):
         raise HTTPException(
@@ -78,16 +77,14 @@ async def register(
 
     user = await users_repo.create_user(**user_create.dict())
 
-    token = jwt.create_access_token_for_user(
-        user,
-        str(settings.secret_key.get_secret_value()),
-    )
+    # REQ-08 / FF-05: registration creates eligibility only — no contribution seat JWT.
+    # Login (auth:login) is the sole seat issuer (REQ-10).
     return UserInResponse(
         user=UserWithToken(
             username=user.username,
             email=user.email,
             bio=user.bio,
             image=user.image,
-            token=token,
+            token="",
         ),
     )

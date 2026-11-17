@@ -1,0 +1,6 @@
+{
+  "list_status": 200,
+  "get_status": 200,
+  "require_articles_key": true,
+  "empty_set_allowed": true
+}

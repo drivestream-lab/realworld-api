@@ -1,0 +1,6 @@
+{
+  "covers": ["CAP-01", "J-01", "REQ-01", "REQ-02"],
+  "list_path": "/api/articles?limit=20",
+  "dependencies": ["postgres", "realworld-api"],
+  "notes": "Guest list/open — no Authorization header"
+}

@@ -26,6 +26,10 @@ from app.services.articles import check_article_exists, get_slug_for_article
 
 router = APIRouter()
 
+# Unseat (REQ-12 / ADR-004): there is no logout RPC. Clients discard the JWT;
+# subsequent contribution routes fail closed without a bearer (REQ-14).
+# Bulletin reads stay ungated via required=False authorizer (REQ-01..07).
+
 
 @router.get("", response_model=ListOfArticlesInResponse, name="articles:list-articles")
 async def list_articles(

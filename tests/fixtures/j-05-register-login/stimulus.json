@@ -1,0 +1,8 @@
+{
+  "covers": ["J-05", "CAP-02", "REQ-08", "REQ-10"],
+  "steps": [
+    {"method": "POST", "path": "/api/users", "auth": false, "expect": "201 + empty token"},
+    {"method": "POST", "path": "/api/users/login", "auth": false, "expect": "200 + seat token"}
+  ],
+  "dependencies": ["postgres", "realworld-api"]
+}

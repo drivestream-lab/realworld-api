@@ -1,0 +1,8 @@
+{
+  "covers": ["CAP-02", "J-05", "J-07", "J-08", "REQ-08", "REQ-10", "REQ-12", "REQ-14"],
+  "username_prefix": "w0seat",
+  "email_prefix": "w0seat",
+  "password": "w0-seat-password",
+  "dependencies": ["postgres", "realworld-api"],
+  "notes": "Synthetic register/login; unseated create probe omits bearer"
+}
